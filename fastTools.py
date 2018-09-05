@@ -68,10 +68,10 @@ class FastqFile:
             self.twoFilesFlag = True
                 
             # Create lists to hold FASTQ sequences and quality strings from fqlines.
-            fqnameList = [fqlines[i] for i in range(0, len(pairedLinesList), 4)]
-            fqseqList = [fqlines[i] for i in range(1, len(pairedLinesList), 4)]
-            fqdirectionList = [fqlines[i] for i in range(2, len(pairedLinesList), 4)]
-            fqqualList = [fqlines[i] for i in range(3, len(pairedLinesList), 4)]
+            fqnameList = [pairedLinesList[i] for i in range(0, len(pairedLinesList), 4)]
+            fqseqList = [pairedLinesList[i] for i in range(1, len(pairedLinesList), 4)]
+            fqdirectionList = [pairedLinesList[i] for i in range(2, len(pairedLinesList), 4)]
+            fqqualList = [pairedLinesList[i] for i in range(3, len(pairedLinesList), 4)]
                        
         # If there is no reverse file.
         else:
@@ -195,15 +195,8 @@ class FastaFile:
             falines = fastaFile.readlines()
 
         # Create lists to hold FASTQ sequences and quality strings from fqlines
-        fanameList = []
-        faseqList = []
-        
-        # Starting at index 1, add every other line to faseqList
-        for i in range(0, len(falines), 2):
-            fanameList.append(falines[i].strip())
-
-        for j in range(1, len(falines), 2):
-            faseqList.append(falines[j].strip())
+        fanameList = [falines[i] for i in range(0, len(falines), 2)]
+        faseqList = [falines[i] for i in range(1, len(falines), 2)]
 
         self.fafiledf = pd.DataFrame({'Name': fanameList, 'Seq': faseqList})
         
