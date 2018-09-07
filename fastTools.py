@@ -11,6 +11,7 @@ import os
 import gzip
 import pandas as pd
 import csv
+from Bio.Seq import Seq
 
 
 class FastqFile:
@@ -120,6 +121,10 @@ class FastqFile:
         # Adds the quality scores in a coloumn to the dataframe
         self.fqfiledf['Avg Qual'] = qualscores
         
+    def calcRevComp(self):
+        
+        self.fqfiledf['Reverse Complement'] = self.fqfiledf['Seq'].apply(reverseComplement)
+        
         
     def plotAverageQuality(self):
         if 'Avg Qual' in self.fqfiledf.columns:
@@ -128,6 +133,11 @@ class FastqFile:
             print('This FastqFile object does not have average quality calculations.')
             print('Use yourFastqObject.qualAverage() to generate per-read average quality data before using this function.')
 
+
+def reverseComplement(seqString):
+    revComp = str(Seq(seqString).reverse_complement())
+    
+    return revComp
         
 def writeFASTQ(outfile, dataframe):
     """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
