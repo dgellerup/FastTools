@@ -119,6 +119,14 @@ class FastqFile:
         self.fqfiledf['Avg Qual'] = qualscores
         
         
+    def plotAverageQuality(self):
+        if 'Avg Qual' in self.fqfiledf.columns:
+            ax = self.fqfiledf['Avg Qual'].plot.kde()
+        else:
+            print('This FastqFile object does not have average quality calculations.')
+            print('Use yourFastqObject.qualAverage() to generate per-read average quality data before using this function.')
+
+        
 def writeFASTQ(outfile, dataframe):
     """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
     column resembling a FASTQ file with each line as a row. This makes writing the
