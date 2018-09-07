@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr 17 10:43:54 2018
+fastTools was created and is maintained by Dane Gellerup (https://github.com/dgellerup).
 
-@author: dgelleru
+This module is intended to make reading, analyzing, manipulating, and writing FASTQ
+and FASTA files in Python easier, faster, and accessible to more users.
+
 """
 import os
 import gzip
