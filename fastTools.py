@@ -12,6 +12,7 @@ import gzip
 import pandas as pd
 import csv
 from Bio.Seq import Seq
+from Bio.SeqUtils import GC
 
 
 class FastqFile:
@@ -126,6 +127,11 @@ class FastqFile:
         self.fqfiledf['Reverse Complement'] = self.fqfiledf['Seq'].apply(reverseComplement)
         
         
+    def calcGC(self):
+        
+        self.fqfiledf['GC Content'] = self.fqfiledf['Seq'].apply(GCcontent)
+        
+        
     def plotAverageQuality(self):
         if 'Avg Qual' in self.fqfiledf.columns:
             ax = self.fqfiledf['Avg Qual'].plot.kde()
@@ -138,6 +144,11 @@ def reverseComplement(seqString):
     revComp = str(Seq(seqString).reverse_complement())
     
     return revComp
+
+def GCcontent(seqString):
+    GCpercent = GC(seqString)
+    
+    return GCpercent
         
 def writeFASTQ(outfile, dataframe):
     """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
