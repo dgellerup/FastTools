@@ -19,7 +19,7 @@ class FastqFile:
     """Class that creates a FASTQ file object when given a file name. FASTQ objects
     contain a truncated sample name (self.sample) and a Pandas data frame that
     holds sequence and quality data. Methods are available for calculating basic
-    informatics, such as average read quality.
+    informatics, such as average read quality and GC content.
     
     Args:
         fastq (str): Name of a .fastq.gz file.
@@ -94,7 +94,7 @@ class FastqFile:
         self.numReads = len(self.fqfiledf)
             
     
-    def qualAverage(self):
+    def averageQuality(self):
         """Appends a column to self.fqfiledf that contains average quality scores for each read.
         
         Args:
@@ -122,12 +122,13 @@ class FastqFile:
         # Adds the quality scores in a coloumn to the dataframe
         self.fqfiledf['Avg Qual'] = qualscores
         
-    def calcRevComp(self):
         
-        self.fqfiledf['Reverse Complement'] = self.fqfiledf['Seq'].apply(reverseComplement)
+    def reverseComplement(self):
+        
+        self.fqfiledf['Reverse Complement'] = self.fqfiledf['Seq'].apply(revComp)
         
         
-    def calcGC(self):
+    def calculateGC(self):
         
         self.fqfiledf['GC Content'] = self.fqfiledf['Seq'].apply(GCcontent)
         
@@ -140,71 +141,80 @@ class FastqFile:
             print('Use yourFastqObject.qualAverage() to generate per-read average quality data before using this function.')
 
 
-def reverseComplement(seqString):
+    def writeFASTQ(self, outfile):
+        """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
+        column resembling a FASTQ file with each line as a row. This makes writing the
+        output file much faster than using Python's built-in write function in a loop.
+        
+        Args:
+            outfile (str): Name of the output file, cleaned and formatted by this program.
+            dataframe (:obj: pd.DataFrame): Pandas dataframe containing FASTQ info, each read on one line.
+        
+        """
+        try:
+            # Create one-column DataFrames from the columns of dataframe.
+            namedf = pd.DataFrame(self.fqfiledf['Name'])
+            seqdf = pd.DataFrame(self.fqfiledf['Seq'])
+            directiondf = pd.DataFrame(self.fqfiledf['Direction'])
+            qualdf = pd.DataFrame(self.fqfiledf['Qual'])
+        except:
+            return "This doesn't appear to be a FastqFile object."
+        
+        # Give each row a pseudo-index, offset from 0-4, stepping 4 for each index.
+        nameid = list(range(0, len(namedf)*4, 4))
+        seqid = list(range(1, len(namedf)*4, 4))
+        dirid = list(range(2, len(namedf)*4, 4))
+        qualid = list(range(3, len(namedf)*4, 4))
+        
+        # Add an 'id' column to each individual DataFrame.
+        namedf['id'] = nameid
+        seqdf['id'] = seqid
+        directiondf['id'] = dirid
+        qualdf['id'] = qualid
+        
+        # Create new column names.
+        namedf.columns = ["line", "id"]
+        seqdf.columns = ["line", "id"]
+        directiondf.columns = ["line", "id"]
+        qualdf.columns = ["line", "id"]
+        
+        # Concatenate individual DataFrames into one longdf (pseudo-indeces out of order).
+        longdf = pd.concat([namedf, seqdf, directiondf, qualdf])
+        
+        # Sort values in longdf by thier pseudo-indeces, restoring original FASTQ structure.
+        longdf.sort_values('id', inplace=True)
+        
+        # Reset index so there are no multiple indeces.
+        longdf.reset_index(drop=True, inplace=True)
+        
+        # Drop pseudo-indeces.
+        longdf.drop('id', axis=1, inplace=True)
+        
+        # Remove newline characters.
+        longdf['line'] = longdf['line'].apply(removeNewline)
+        
+        # Use pandas to write DataFrame as FASTQ file (faster than built-in Python).
+        longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
+       
+
+def revComp(seqString):
+    """Custom function to use with apply() in a pandas DataFrame. Produces the
+    reverse complement sequence string of the sequences in a DataFrame column or
+    pandas Series.
+    """
     revComp = str(Seq(seqString).reverse_complement())
     
     return revComp
 
+
 def GCcontent(seqString):
+    """Custom function to use with apply() in a pandas DataFrame. Calculates the
+    GC content of the sequences in a DataFrame column or pandas Series.
+    """
     GCpercent = GC(seqString)
     
-    return GCpercent
-        
-def writeFASTQ(outfile, dataframe):
-    """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
-    column resembling a FASTQ file with each line as a row. This makes writing the
-    output file much faster than using Python's built-in write function in a loop.
-    
-    Args:
-        outfile (str): Name of the output file, cleaned and formatted by this program.
-        dataframe (:obj: pd.DataFrame): Pandas dataframe containing FASTQ info, each read on one line.
-    
-    """
-    try:
-        # Create one-column DataFrames from the columns of dataframe.
-        namedf = pd.DataFrame(dataframe['Name'])
-        seqdf = pd.DataFrame(dataframe['Seq'])
-        directiondf = pd.DataFrame(dataframe['Direction'])
-        qualdf = pd.DataFrame(dataframe['Qual'])
-    except:
-        return "This doesn't appear to be a FastqFile object."
-    
-    # Give each row a pseudo-index, offset from 0-4, stepping 4 for each index.
-    nameid = list(range(0, len(namedf)*4, 4))
-    seqid = list(range(1, len(namedf)*4, 4))
-    dirid = list(range(2, len(namedf)*4, 4))
-    qualid = list(range(3, len(namedf)*4, 4))
-    
-    # Add an 'id' column to each individual DataFrame.
-    namedf['id'] = nameid
-    seqdf['id'] = seqid
-    directiondf['id'] = dirid
-    qualdf['id'] = qualid
-    
-    # Create new column names.
-    namedf.columns = ["line", "id"]
-    seqdf.columns = ["line", "id"]
-    directiondf.columns = ["line", "id"]
-    qualdf.columns = ["line", "id"]
-    
-    # Concatenate individual DataFrames into one longdf (pseudo-indeces out of order).
-    longdf = pd.concat([namedf, seqdf, directiondf, qualdf])
-    
-    # Sort values in longdf by thier pseudo-indeces, restoring original FASTQ structure.
-    longdf.sort_values('id', inplace=True)
-    
-    # Reset index so there are no multiple indeces.
-    longdf.reset_index(drop=True, inplace=True)
-    
-    # Drop pseudo-indeces.
-    longdf.drop('id', axis=1, inplace=True)
-    
-    # Remove newline characters.
-    longdf['line'] = longdf['line'].apply(removeNewline)
-    
-    # Use pandas to write DataFrame as FASTQ file (faster than built-in Python).
-    longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
-   
+    return GCpercent        
+
 
 def removeNewline(x):
     """Custom function to use with apply() in a pandas DataFrame. Simply removes
@@ -216,7 +226,15 @@ def removeNewline(x):
      
         
 class FastaFile:
+    """Class that creates a FASTA file object when given a file name. FASTA objects
+    contain a truncated sample name (self.sample) and a Pandas data frame that
+    holds sequence and sequence name data. Methods are available for calculating basic
+    informatics, such as GC content and reverse complement sequences.
     
+    Args:
+        fasta (str): Name of a .fasta file.
+    
+    """
     def __init__(self, fasta):
         self.fasta = fasta
         
@@ -239,53 +257,70 @@ class FastaFile:
         self.fafiledf = pd.DataFrame({'Name': fanameList, 'Seq': faseqList})
         
         
-def writeFASTA(outfile, dataframe):
-    """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
-    column resembling a FASTQ file with each line as a row. This makes writing the
-    output file much faster than using Python's built-in write function in a loop.
-    
-    Args:
-        outfile (str): Name of the output file, cleaned and formatted by this program.
-        dataframe (:obj: pd.DataFrame): Pandas dataframe containing FASTQ info, each read on one line.
-    
-    """
-    try:
-        # Create one-column DataFrames from the columns of dataframe.
-        namedf = pd.DataFrame(dataframe['Name'])
-        seqdf = pd.DataFrame(dataframe['Seq'])
-    except:
-        return "This doesn't appear to be a FastaFile object."
-    
-    # Give each row a pseudo-index, offset from 0-4, stepping 4 for each index.
-    nameid = list(range(0, len(namedf)*4, 4))
-    seqid = list(range(1, len(namedf)*4, 4))
-    
-    # Add an 'id' column to each individual DataFrame.
-    namedf['id'] = nameid
-    seqdf['id'] = seqid
-    
-    # Create new column names.
-    namedf.columns = ["line", "id"]
-    seqdf.columns = ["line", "id"]
-    
-    # Concatenate individual DataFrames into one longdf (pseudo-indeces out of order).
-    longdf = pd.concat([namedf, seqdf])
-    
-    # Sort values in longdf by thier pseudo-indeces, restoring original FASTQ structure.
-    longdf.sort_values('id', inplace=True)
-    
-    # Reset index so there are no multiple indeces.
-    longdf.reset_index(drop=True, inplace=True)
-    
-    # Drop pseudo-indeces.
-    longdf.drop('id', axis=1, inplace=True)
-    
-    # Remove newline characters.
-    longdf['line'] = longdf['line'].apply(removeNewline)
-    
-    # Use pandas to write DataFrame as FASTQ file (faster than built-in Python).
-    longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
-   
+    def reverseComplement(self):
+        """Creates a new column 'Reverse Complement' in self.fqfiledf that contains
+        the reverse complement sequence for each sequence.
+        """
+        self.fqfiledf['Reverse Complement'] = self.fqfiledf['Seq'].apply(revComp)
+        
+        
+    def calculateGC(self):
+        """Creates a new column 'GC Content' in self.fqfiledf that contains the GC
+        content for each sequence as a percent represented by a float.
+        """
+        self.fqfiledf['GC Content'] = self.fqfiledf['Seq'].apply(GCcontent)
+        
+        
+    def writeFASTA(self, outfile):
+        """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
+        column resembling a FASTA file with each line as a row. This makes writing the
+        output file much faster than using Python's built-in write function in a loop.
+        
+        Args:
+            self
+            outfile (str): Name of the output file, cleaned and formatted by this program.
+            
+        Returns:
+            None
+        
+        """
+        try:
+            # Create one-column DataFrames from the columns of dataframe.
+            namedf = pd.DataFrame(self.fafiledf['Name'])
+            seqdf = pd.DataFrame(self.fafiledf['Seq'])
+        except:
+            return "This doesn't appear to be a FastaFile object."
+        
+        # Give each row a pseudo-index, offset from 0-4, stepping 4 for each index.
+        nameid = list(range(0, len(namedf)*4, 4))
+        seqid = list(range(1, len(namedf)*4, 4))
+        
+        # Add an 'id' column to each individual DataFrame.
+        namedf['id'] = nameid
+        seqdf['id'] = seqid
+        
+        # Create new column names.
+        namedf.columns = ["line", "id"]
+        seqdf.columns = ["line", "id"]
+        
+        # Concatenate individual DataFrames into one longdf (pseudo-indeces out of order).
+        longdf = pd.concat([namedf, seqdf])
+        
+        # Sort values in longdf by thier pseudo-indeces, restoring original FASTQ structure.
+        longdf.sort_values('id', inplace=True)
+        
+        # Reset index so there are no multiple indeces.
+        longdf.reset_index(drop=True, inplace=True)
+        
+        # Drop pseudo-indeces.
+        longdf.drop('id', axis=1, inplace=True)
+        
+        # Remove newline characters.
+        longdf['line'] = longdf['line'].apply(removeNewline)
+        
+        # Use pandas to write DataFrame as FASTQ file (faster than built-in Python).
+        longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
+       
       
 qualdict = {'!': 0, '"': 1, '#': 2, '$': 3, '%': 4, '&': 5, '\'': 6, '(': 7, ')': 8, '*': 9, '+': 10,
                 ',': 11, '-': 12, '.': 13, '/': 14, '0': 15, '1': 16, '2': 17, '3': 18, '4': 19, '5': 20,
