@@ -13,6 +13,8 @@ import pandas as pd
 import csv
 from Bio.Seq import Seq
 from Bio.SeqUtils import GC
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 class FastqFile:
@@ -22,21 +24,29 @@ class FastqFile:
     informatics, such as average read quality and GC content.
     
     Args:
-        fastq (str): Name of a .fastq.gz file.
+        fastq (str): Name of a .fastq or .fastq.gz file.
+        paired (bool): Boolean indicating whether FastqFile class should look for and interleave paired read file.
     
     """
         
-    def __init__(self, fastq):
+    def __init__(self, fastq, paired=True):
         
         self.fastq = fastq
         
-        # Takes the full file name and  shortens it to a readable name.
-        self.sample = '_'.join(fastq.split("_")[:2])
+        # Takes the full file name and shortens it to a readable name.
+        try:
+            self.sample = '_'.join(fastq.split("_")[:2])
+        except:
+            self.sample = fastq
         
-        self.twoFilesFlag = False
+        self.paired = paired
         
-        # Splice R2 in place of R1 in fastq file name.
-        fastq2 = fastq.split("_R1_")[0] + "_R2_" + fastq.split("_R1_")[1]
+        if "_R1_" in fastq:
+            # Replace '_R1_' with '_R2_' in fastq file name.
+            fastq2 = fastq.replace("_R1_", "_R2_")
+        elif "_R2_" in fastq:
+            # Replace '_R2_' with '_R1_' in fastq file name.
+            fastq2 = fastq.replace("_R2_", "_R1_")
         
         # Read fastq into fqlines list.
         if fastq.endswith('.gz'):
@@ -46,38 +56,37 @@ class FastqFile:
             with open(fastq, 'r') as fastqFile:
                 fqlines = fastqFile.readlines()
            
-        # If there is a reverse file, read it and add it to fqlines.
-        if fastq2 in os.listdir():
-            if fastq2.endswith('.gz'):
-                with gzip.open(fastq2, 'rt') as fastq2File:
-                    fq2lines = fastq2File.readlines()
-            else:
-                with open(fastq2, 'r') as fastq2File:
-                    fq2lines = fastq2File.readlines()
-
-            # Create a new file lines list, and add fastq reads in an interleaved orientation.
-            pairedLinesList = []
-        
-            for i in range(0, len(fqlines), 4):
-                pairedLinesList.append(fqlines[i])
-                pairedLinesList.append(fqlines[i+1])
-                pairedLinesList.append(fqlines[i+2])
-                pairedLinesList.append(fqlines[i+3])
-        
-                pairedLinesList.append(fq2lines[i])
-                pairedLinesList.append(fq2lines[i+1])
-                pairedLinesList.append(fq2lines[i+2])
-                pairedLinesList.append(fq2lines[i+3])
+        if paired:
+            # If there is a reverse file, read it and add it to fqlines.
+            if fastq2 in os.listdir():
+                if fastq2.endswith('.gz'):
+                    with gzip.open(fastq2, 'rt') as fastq2File:
+                        fq2lines = fastq2File.readlines()
+                else:
+                    with open(fastq2, 'r') as fastq2File:
+                        fq2lines = fastq2File.readlines()
+    
+                # Create a new file lines list, and add fastq reads in an interleaved orientation.
+                pairedLinesList = []
             
-            self.twoFilesFlag = True
-                
-            # Create lists to hold FASTQ sequences and quality strings from pairedLinesList.
-            fqnameList = [pairedLinesList[i] for i in range(0, len(pairedLinesList), 4)]
-            fqseqList = [pairedLinesList[i] for i in range(1, len(pairedLinesList), 4)]
-            fqdirectionList = [pairedLinesList[i] for i in range(2, len(pairedLinesList), 4)]
-            fqqualList = [pairedLinesList[i] for i in range(3, len(pairedLinesList), 4)]
+                for i in range(0, len(fqlines), 4):
+                    pairedLinesList.append(fqlines[i])
+                    pairedLinesList.append(fqlines[i+1])
+                    pairedLinesList.append(fqlines[i+2])
+                    pairedLinesList.append(fqlines[i+3])
+            
+                    pairedLinesList.append(fq2lines[i])
+                    pairedLinesList.append(fq2lines[i+1])
+                    pairedLinesList.append(fq2lines[i+2])
+                    pairedLinesList.append(fq2lines[i+3])
+                    
+                # Create lists to hold FASTQ sequences and quality strings from pairedLinesList.
+                fqnameList = [pairedLinesList[i] for i in range(0, len(pairedLinesList), 4)]
+                fqseqList = [pairedLinesList[i] for i in range(1, len(pairedLinesList), 4)]
+                fqdirectionList = [pairedLinesList[i] for i in range(2, len(pairedLinesList), 4)]
+                fqqualList = [pairedLinesList[i] for i in range(3, len(pairedLinesList), 4)]
                        
-        # If there is no reverse file.
+        # If there is no reverse file, or an unpaired FastqFile object is desired.
         else:
             
             # Create lists to hold FASTQ sequences and quality strings from fqlines.
@@ -87,15 +96,15 @@ class FastqFile:
             fqqualList = [fqlines[i] for i in range(3, len(fqlines), 4)]
             
         
-        # Create a data frame "fqfiledf" from fqseqList and fqqualList
-        self.fqfiledf = pd.DataFrame({'Name': fqnameList, 'Seq': fqseqList, 
+        # Create a data frame "fastqDataFrame" from fqseqList and fqqualList
+        self.fastqDataFrame = pd.DataFrame({'Name': fqnameList, 'Seq': fqseqList, 
                                       'Direction': fqdirectionList, 'Qual': fqqualList})
     
-        self.numReads = len(self.fqfiledf)
+        self.numReads = len(self.fastqDataFrame)
             
-    
+        
     def averageQuality(self):
-        """Appends a column to self.fqfiledf that contains average quality scores for each read.
+        """Appends a column to self.fastqDataFrame that contains average quality scores for each read.
         
         Args:
             self
@@ -105,41 +114,76 @@ class FastqFile:
         
         """
         
-        quallist = self.fqfiledf['Qual']
+        quallist = self.fastqDataFrame['Qual']
         qualscores = []
         
         # Create a list for the quality strings and append the corresponding quality scores
         for item in quallist:
-            qualstringlist = []
-            
-            for symbol in item.strip():
-                qualstringlist.append(qualdict[symbol])
+            qualstringseries = pd.Series([qScoreDict[symbol] for symbol in item.strip()])
             
             # Create a variable for the overall average quality of each line
-            avequal = sum(qualstringlist)/float(len(qualstringlist))    
+            avequal = qualstringseries.mean()    
             qualscores.append(avequal)
         
         # Adds the quality scores in a coloumn to the dataframe
-        self.fqfiledf['Avg Qual'] = qualscores
+        self.fastqDataFrame['Avg Qual'] = qualscores
         
         
     def reverseComplement(self):
         
-        self.fqfiledf['Reverse Complement'] = self.fqfiledf['Seq'].apply(revComp)
+        self.fastqDataFrame['Reverse Complement'] = self.fastqDataFrame['Seq'].apply(revComp)
         
         
     def calculateGC(self):
         
-        self.fqfiledf['GC Content'] = self.fqfiledf['Seq'].apply(GCcontent)
+        self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(GCcontent)
         
         
     def plotAverageQuality(self):
-        if 'Avg Qual' in self.fqfiledf.columns:
-            ax = self.fqfiledf['Avg Qual'].plot.kde()
+        if 'Avg Qual' in self.fastqDataFrame.columns:
+            fig = plt.figure(figsize=(9, 6))
+            
+            sns.distplot(self.fastqDataFrame['Avg Qual'], kde=False)
+            
+            plt.title("Per Sequence Average Quality")
+            plt.ylabel("Count")
+            plt.xlabel("Quality Score")
+            
+            plt.tight_layout()
+            plt.show()
+            
         else:
-            print('This FastqFile object does not have average quality calculations.')
-            print('Use yourFastqObject.qualAverage() to generate per-read average quality data before using this function.')
+            print("Calculating per-read average quality data.")
+            
+            self.averageQuality()
+            
+            print("'Avg Qual' column has been added to self.fastqDataFrame")
+            
+            self.plotAverageQuality()
+            
 
+    def plotGCcontent(self):
+        if 'GC Content' in self.fastqDataFrame.columns:
+            fig = plt.figure(figsize=(9, 6))
+            
+            sns.distplot(self.fastqDataFrame['GC Content'], kde=False)
+            
+            plt.title("Per Sequence GC Content")
+            plt.ylabel("Count")
+            plt.xlabel("GC Content (%)")
+            
+            plt.tight_layout()
+            plt.show()
+            
+        else:
+            print("Calculating per-read GC content data.")
+            
+            self.calculateGC()
+            
+            print("'GC Content' column has been added to self.fastqDataFrame")
+            
+            self.plotGCcontent()
+            
 
     def writeFASTQ(self, outfile):
         """Takes an outfile string and a dataframe. Converts 2D DataFrame to a single
@@ -153,10 +197,10 @@ class FastqFile:
         """
         try:
             # Create one-column DataFrames from the columns of dataframe.
-            namedf = pd.DataFrame(self.fqfiledf['Name'])
-            seqdf = pd.DataFrame(self.fqfiledf['Seq'])
-            directiondf = pd.DataFrame(self.fqfiledf['Direction'])
-            qualdf = pd.DataFrame(self.fqfiledf['Qual'])
+            namedf = pd.DataFrame(self.fastqDataFrame['Name'])
+            seqdf = pd.DataFrame(self.fastqDataFrame['Seq'])
+            directiondf = pd.DataFrame(self.fastqDataFrame['Direction'])
+            qualdf = pd.DataFrame(self.fastqDataFrame['Qual'])
         except:
             return "This doesn't appear to be a FastqFile object."
         
@@ -254,21 +298,44 @@ class FastaFile:
         for j in range(1, len(falines), 2):
             faseqList.append(falines[j].strip())
 
-        self.fafiledf = pd.DataFrame({'Name': fanameList, 'Seq': faseqList})
+        self.fastaDataFrame = pd.DataFrame({'Name': fanameList, 'Seq': faseqList})
         
         
     def reverseComplement(self):
-        """Creates a new column 'Reverse Complement' in self.fqfiledf that contains
+        """Creates a new column 'Reverse Complement' in self.fastqDataFrame that contains
         the reverse complement sequence for each sequence.
         """
-        self.fqfiledf['Reverse Complement'] = self.fqfiledf['Seq'].apply(revComp)
+        self.fastqDataFrame['Reverse Complement'] = self.fastqDataFrame['Seq'].apply(revComp)
         
         
     def calculateGC(self):
-        """Creates a new column 'GC Content' in self.fqfiledf that contains the GC
+        """Creates a new column 'GC Content' in self.fastqDataFrame that contains the GC
         content for each sequence as a percent represented by a float.
         """
-        self.fqfiledf['GC Content'] = self.fqfiledf['Seq'].apply(GCcontent)
+        self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(GCcontent)
+        
+        
+    def plotGCcontent(self):
+        if 'GC Content' in self.fastaDataFrame.columns:
+            fig = plt.figure(figsize=(9, 6))
+            
+            sns.distplot(self.fastaDataFrame['GC Content'], kde=False)
+            
+            plt.title("Per Sequence GC Content")
+            plt.ylabel("Count")
+            plt.xlabel("GC Content (%)")
+            
+            plt.tight_layout()
+            plt.show()
+            
+        else:
+            print("Calculating per-read GC content data.")
+            
+            self.calculateGC()
+            
+            print("'GC Content' column has been added to self.fastqDataFrame")
+            
+            self.plotGCcontent()
         
         
     def writeFASTA(self, outfile):
@@ -286,8 +353,8 @@ class FastaFile:
         """
         try:
             # Create one-column DataFrames from the columns of dataframe.
-            namedf = pd.DataFrame(self.fafiledf['Name'])
-            seqdf = pd.DataFrame(self.fafiledf['Seq'])
+            namedf = pd.DataFrame(self.fastaDataFrame['Name'])
+            seqdf = pd.DataFrame(self.fastaDataFrame['Seq'])
         except:
             return "This doesn't appear to be a FastaFile object."
         
@@ -322,7 +389,7 @@ class FastaFile:
         longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
        
       
-qualdict = {'!': 0, '"': 1, '#': 2, '$': 3, '%': 4, '&': 5, '\'': 6, '(': 7, ')': 8, '*': 9, '+': 10,
+qScoreDict = {'!': 0, '"': 1, '#': 2, '$': 3, '%': 4, '&': 5, '\'': 6, '(': 7, ')': 8, '*': 9, '+': 10,
                 ',': 11, '-': 12, '.': 13, '/': 14, '0': 15, '1': 16, '2': 17, '3': 18, '4': 19, '5': 20,
                 '6': 21, '7': 22, '8': 23, '9': 24, ':': 25, ';': 26, '<': 27, '=': 28, '>': 29, '?': 30,
                 '@': 31, 'A': 32, 'B': 33, 'C': 34, 'D': 35, 'E': 36, 'F': 37, 'G': 38, 'H': 39, 'I': 40,
