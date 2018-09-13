@@ -8,14 +8,12 @@ data.
 1. Clone or download FastTools repository.
 
 2. Create fastTools environment.
-
-* Use command: conda env create -f environment.yml
+     * Use command: conda env create -f environment.yml
 
 3. Include fastTools in your project directory alongside your own modules or scripts.
 
 4. Import module.
-
-* Place "import fastTools" at the top of the script you want to use it in.
+     * Place "import fastTools" at the top of the script you want to use it in.
 
 ## Module Attributes
 qScoreDict: Dictionary that maps Illumina QScore symbols to their integer values.  
