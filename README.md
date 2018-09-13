@@ -52,6 +52,7 @@ self.numReads: Number of reads in self.fastqDataFrame.
   * Note this is the same as len(myfile.fastqDataFrame)
   
 #### Class methods
+##### These methods create a new column in self.fastqDataFrame that contains calculated data.
 self.averageQuality()
 
 self.reverseComplement()
@@ -60,10 +61,12 @@ self.aminoAcid()
 
 self.calculateGC()
 
+##### These methods create plots that can either be displayed or saved.
 self.plotAverageQuality(outfile=False)
 
 self.plotGCcontent(outfile=False)
 
+##### This method saves your FastqFile object as a .fastq.gz file in the current directory.
 self.writeFASTQ(outfile)
 
 ## FastaFile class
@@ -86,12 +89,15 @@ self.numReads: Number of reads in self.fastqDataFrame.
   * Note this is the same as len(myfile.fastaDataFrame)
   
 #### Class methods
+##### These methods create a new column in self.fastqDataFrame that contains calculated data.
 self.reverseComplement()
 
 self.aminoAcid()
 
 self.calculateGC()
 
+##### This method creates a plot that can either be displayed or saved.
 self.plotGCcontent(outfile=False)
 
+##### This method saves your FastaFile object as a .fasta file in the current directory.
 self.writeFASTA(outfile)
