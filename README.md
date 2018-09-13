@@ -17,4 +17,40 @@ data.
 
 * Place "import fastTools" at the top of the script you want to use it in.
 
-## Module attributes
+## Module Attributes
+qScoreDict: Dictionary that maps Illumina QScore symbols to their integer values.  
+* Usage
+  * fastTools.qScoreDict
+  * fastTools.qScoreDict['?']
+    * Returns 30
+
+## FastqFile class
+### Usage
+#### Initialization
+  * myfile = fastTools.FastqFile('Sample1_S1_L001_R1_001.fastq.gz')
+    * Will create interleaved FastqFile object using R1 and R2 files.
+    
+  * myfile = fastTools.FastqFile('Sample1_S1_L001_R2_001.fastq.gz', False)
+    * Will create a FastqFile from only the file name passed.
+    
+  * myfile = fastTools.FastaFile('Sample1.fasta')
+#### Class attributes
+self.fastq: Name of FASTQ file passed during initialization.
+
+self.sample: Truncated name of FASTQ file, convenient for labelling.
+
+self.paired: True if R1 and R2 files were read and combined; False if only R1 or R2 file used.
+
+self.fastqDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
+
+self.numReads: Number of reads in self.fastqDataFrame.
+
+##### Example:
+* myfile.fastq
+  * Returns 'Sample1_S1_L001_R2_001.fastq.gz'
+* myfile.sample
+  * Returns 'Sample1_S1'
+* myfile.numReads
+  * Returns 432281
+  * Note this is the same as len(myfile.fastqDataFrame)
+  
