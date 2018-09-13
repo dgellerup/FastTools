@@ -21,7 +21,11 @@ class FastqFile:
     """Class that creates a FASTQ file object when given a file name. FASTQ objects
     contain a truncated sample name (self.sample) and a Pandas data frame that
     holds sequence and quality data. Methods are available for calculating basic
-    informatics, such as average read quality and GC content.
+    informatics, such as average read quality and GC content. If paired is passed
+    as False an object will be built with only reads from the file name passed;
+    if paired is not passed, or is redundantly passed as True, FastqFile will look
+    for a matching forward/reverse (R1 or R2) file and combine them into an
+    interleaved FastqFile object.
     
     Args:
         fastq (str): Name of a .fastq or .fastq.gz file.
@@ -130,21 +134,60 @@ class FastqFile:
         
         
     def reverseComplement(self):
+        """Creates a new column in self.fastqDataFrame to hold reverse complement
+        DNA sequences.
+        
+        Args:
+            self
+            
+        Returns:
+            none
+        """
         
         self.fastqDataFrame['Reverse Complement'] = self.fastqDataFrame['Seq'].apply(revComp)
         
         
     def aminoAcid(self):
+        """Creates a new column in self.fastqDataFrame to hold Amino Acid sequences.
         
+        Args:
+            self
+            
+        Returns:
+            none
+        """
+
         self.fastqDataFrame['AA Sequence'] = self.fastqDataFrame['Seq'].apply(aa)
         
         
     def calculateGC(self):
+        """Creates a new column in self.fastqDataFrame to hold GC content (float) for each
+        sequence.
+        
+        Args:
+            self
+            
+        Returns:
+            none
+        """
         
         self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(GCcontent)
         
         
-    def plotAverageQuality(self):
+    def plotAverageQuality(self, outfile=False):
+        """FastqFile class method that allows a user to easily plot a histogram
+        of per-read average Q Score for a FastqFile object. If average quality
+        has not yet been calculated, calls self.averageQuality() first.
+        Requires no plotting experience.
+        
+        Args:
+            self
+            outfile (str) (optional): Name of plot output file.
+            
+        Returns:
+            none
+        """
+        
         if 'Avg Qual' in self.fastqDataFrame.columns:
             fig = plt.figure(figsize=(9, 6))
             
@@ -155,7 +198,11 @@ class FastqFile:
             plt.xlabel("Quality Score")
             
             plt.tight_layout()
-            plt.show()
+            
+            if outfile:
+                plt.savefig()
+            else:
+                plt.show()
             
         else:
             print("Calculating per-read average quality data.")
@@ -167,7 +214,19 @@ class FastqFile:
             self.plotAverageQuality()
             
 
-    def plotGCcontent(self):
+    def plotGCcontent(self, outfile=False):
+        """FastqFile class method that allows a user to easily plot a histogram
+        of per-read GC content for a FastqFile object. If GC content has not yet
+        been calculated, calls self.calculateGC() first. Requires no plotting experience.
+        
+        Args:
+            self
+            outfile (str) (optional): Name of plot output file.
+            
+        Returns:
+            none
+        """
+        
         if 'GC Content' in self.fastqDataFrame.columns:
             fig = plt.figure(figsize=(9, 6))
             
@@ -178,7 +237,11 @@ class FastqFile:
             plt.xlabel("GC Content (%)")
             
             plt.tight_layout()
-            plt.show()
+            
+            if outfile:
+                plt.savefig()
+            else:
+                plt.show()
             
         else:
             print("Calculating per-read GC content data.")
@@ -200,6 +263,7 @@ class FastqFile:
             dataframe (:obj: pd.DataFrame): Pandas dataframe containing FASTQ info, each read on one line.
         
         """
+        
         try:
             # Create one-column DataFrames from the columns of dataframe.
             namedf = pd.DataFrame(self.fastqDataFrame['Name'])
@@ -245,41 +309,6 @@ class FastqFile:
         # Use pandas to write DataFrame as FASTQ file (faster than built-in Python).
         longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
        
-
-def revComp(seqString):
-    """Custom function to use with apply() in a pandas DataFrame. Produces the
-    reverse complement sequence string of the sequences in a DataFrame column or
-    pandas Series.
-    """
-    revComp = str(Seq(seqString).reverse_complement())
-    
-    return revComp
-
-
-def GCcontent(seqString):
-    """Custom function to use with apply() in a pandas DataFrame. Calculates the
-    GC content of the sequences in a DataFrame column or pandas Series.
-    """
-    GCpercent = GC(seqString)
-    
-    return GCpercent        
-
-
-def aa(seqString):
-    
-    amino = str(Seq(seqString).translate())
-    
-    return amino
-
-
-def removeNewline(x):
-    """Custom function to use with apply() in a pandas DataFrame. Simply removes
-    new line characters from strings in a column.
-    """
-    
-    x = x.strip('\n')
-    return x
-     
         
 class FastaFile:
     """Class that creates a FASTA file object when given a file name. FASTA objects
@@ -291,6 +320,7 @@ class FastaFile:
         fasta (str): Name of a .fasta file.
     
     """
+    
     def __init__(self, fasta):
         self.fasta = fasta
         
@@ -312,22 +342,63 @@ class FastaFile:
 
         self.fastaDataFrame = pd.DataFrame({'Name': fanameList, 'Seq': faseqList})
         
+        self.numReads = len(self.fastaDataFrame)
+        
         
     def reverseComplement(self):
-        """Creates a new column 'Reverse Complement' in self.fastqDataFrame that contains
-        the reverse complement sequence for each sequence.
+        """Creates a new column in self.fastqDataFrame to hold reverse complement
+        DNA sequences.
+        
+        Args:
+            self
+            
+        Returns:
+            none
         """
+        
         self.fastqDataFrame['Reverse Complement'] = self.fastqDataFrame['Seq'].apply(revComp)
         
         
-    def calculateGC(self):
-        """Creates a new column 'GC Content' in self.fastqDataFrame that contains the GC
-        content for each sequence as a percent represented by a float.
+    def aminoAcid(self):
+        """Creates a new column in self.fastqDataFrame to hold Amino Acid sequences.
+        
+        Args:
+            self
+            
+        Returns:
+            none
         """
+        
+        self.fastqDataFrame['AA Sequence'] = self.fastqDataFrame['Seq'].apply(aa)
+        
+        
+    def calculateGC(self):
+        """Creates a new column in self.fastqDataFrame to hold GC content (float) for each
+        sequence.
+        
+        Args:
+            self
+            
+        Returns:
+            none
+        """
+        
         self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(GCcontent)
         
         
-    def plotGCcontent(self):
+    def plotGCcontent(self, outfile=False):
+        """FastqFile class method that allows a user to easily plot a histogram
+        of per-read GC content for a FastqFile object. If GC content has not yet
+        been calculated, calls self.calculateGC() first. Requires no plotting experience.
+        
+        Args:
+            self
+            outfile (str) (optional): Name of plot output file.
+            
+        Returns:
+            none
+        """
+        
         if 'GC Content' in self.fastaDataFrame.columns:
             fig = plt.figure(figsize=(9, 6))
             
@@ -338,7 +409,11 @@ class FastaFile:
             plt.xlabel("GC Content (%)")
             
             plt.tight_layout()
-            plt.show()
+            
+            if outfile:
+                plt.savefig()
+            else:
+                plt.show()
             
         else:
             print("Calculating per-read GC content data.")
@@ -400,6 +475,73 @@ class FastaFile:
         # Use pandas to write DataFrame as FASTQ file (faster than built-in Python).
         longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
        
+        
+def revComp(seqString):
+    """Custom function used by FastqFile and FastaFile objects in a pandas apply() call to
+    generate an reverse complement DNA sequence string from a DNA sequence string input.
+    This function can also be called with fastTools.revComp(yourSequence), where it will
+    return a reverse complement DNA sequence string. If you require a Bio.Seq object, 
+    use biopython directly instead of this function.
+    
+    Args:
+        seqString (str): DNA sequence string.
+        
+    Returns:
+        revComp (str): DANE sequence string.
+    """
+    
+    revComp = str(Seq(seqString).reverse_complement())
+    
+    return revComp
+
+
+def GCcontent(seqString):
+    """Custom function used by FastqFile and FastaFile objects in a pandas apply() call to
+    calculate the GC content of a DNA sequence. This function can also be called on
+    a sequence manually with fastTools.GCcontent(yourSequence). Same exact usage
+    as biopython's Bio.SeqUtils GC() function.
+    
+    Args:
+        seqString (str): DNA sequence string.
+        
+    Returns: (float): GC content of given DNA sequence in percent.
+    """
+    
+    GCpercent = GC(seqString)
+    
+    return GCpercent        
+
+
+def aa(seqString):
+    """Custom function used by FastqFile and FastaFile objects in a pandas apply() call to
+    generate an Amino Acid string translated from a DNA sequence string input.
+    This function can also be called with fastTools.aa(yourSequence), where it will
+    return an Amino Acid translation string. If you require a Bio.Seq object, 
+    use biopython directly instead of this function.
+    
+    Args:
+        seqString (str): DNA sequence string.
+        
+    Returns:
+        amino (str): Amino Acid string.
+    """
+    
+    amino = str(Seq(seqString).translate())
+    
+    return amino
+
+
+def removeNewline(x):
+    """Custom function to use with apply() in a pandas DataFrame. Simply removes
+    new line characters from strings in a column.
+    """
+    
+    x = x.strip('\n')
+    
+    return x
+     
+        
+
       
 qScoreDict = {'!': 0, '"': 1, '#': 2, '$': 3, '%': 4, '&': 5, '\'': 6, '(': 7, ')': 8, '*': 9, '+': 10,
                 ',': 11, '-': 12, '.': 13, '/': 14, '0': 15, '1': 16, '2': 17, '3': 18, '4': 19, '5': 20,
