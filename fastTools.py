@@ -134,6 +134,11 @@ class FastqFile:
         self.fastqDataFrame['Reverse Complement'] = self.fastqDataFrame['Seq'].apply(revComp)
         
         
+    def aminoAcid(self):
+        
+        self.fastqDataFrame['AA Sequence'] = self.fastqDataFrame['Seq'].apply(aa)
+        
+        
     def calculateGC(self):
         
         self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(GCcontent)
@@ -258,6 +263,13 @@ def GCcontent(seqString):
     GCpercent = GC(seqString)
     
     return GCpercent        
+
+
+def aa(seqString):
+    
+    amino = str(Seq(seqString).translate())
+    
+    return amino
 
 
 def removeNewline(x):
