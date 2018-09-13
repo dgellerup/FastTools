@@ -97,7 +97,9 @@ self.aminoAcid()
 self.calculateGC()
 
 **This method creates a plot that can either be displayed or saved.**
+
 self.plotGCcontent(outfile=False)
 
 **This method saves your FastaFile object as a .fasta file in the current directory.**
+
 self.writeFASTA(outfile)
