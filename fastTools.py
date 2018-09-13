@@ -51,6 +51,8 @@ class FastqFile:
         elif "_R2_" in fastq:
             # Replace '_R2_' with '_R1_' in fastq file name.
             fastq2 = fastq.replace("_R2_", "_R1_")
+        else:
+            fastq2 = False
         
         # Read fastq into fqlines list.
         if fastq.endswith('.gz'):
@@ -60,9 +62,9 @@ class FastqFile:
             with open(fastq, 'r') as fastqFile:
                 fqlines = fastqFile.readlines()
            
-        if paired:
+        if paired == True:
             # If there is a reverse file, read it and add it to fqlines.
-            if fastq2 in os.listdir():
+            if fastq2 != False and fastq2 in os.listdir():
                 if fastq2.endswith('.gz'):
                     with gzip.open(fastq2, 'rt') as fastq2File:
                         fq2lines = fastq2File.readlines()
@@ -324,10 +326,13 @@ class FastaFile:
     def __init__(self, fasta):
         self.fasta = fasta
         
-        # Read fastq with gzip library.
-        with open(fasta, 'r') as fastaFile:
-            
-            falines = fastaFile.readlines()
+        # Read fasta into falines list.
+        if fasta.endswith('.gz'):
+            with gzip.open(fasta, 'rt') as fastaFile:
+                falines = fastaFile.readlines()
+        else:
+            with open(fasta, 'r') as fastaFile:
+                falines = fastaFile.readlines()
 
         # Create lists to hold FASTQ sequences and quality strings from fqlines
         fanameList = []
@@ -346,7 +351,7 @@ class FastaFile:
         
         
     def reverseComplement(self):
-        """Creates a new column in self.fastqDataFrame to hold reverse complement
+        """Creates a new column in self.fastaDataFrame to hold reverse complement
         DNA sequences.
         
         Args:
@@ -356,11 +361,11 @@ class FastaFile:
             none
         """
         
-        self.fastqDataFrame['Reverse Complement'] = self.fastqDataFrame['Seq'].apply(revComp)
+        self.fastaDataFrame['Reverse Complement'] = self.fastaDataFrame['Seq'].apply(revComp)
         
         
     def aminoAcid(self):
-        """Creates a new column in self.fastqDataFrame to hold Amino Acid sequences.
+        """Creates a new column in self.fastaDataFrame to hold Amino Acid sequences.
         
         Args:
             self
@@ -369,11 +374,11 @@ class FastaFile:
             none
         """
         
-        self.fastqDataFrame['AA Sequence'] = self.fastqDataFrame['Seq'].apply(aa)
+        self.fastaDataFrame['AA Sequence'] = self.fastaDataFrame['Seq'].apply(aa)
         
         
     def calculateGC(self):
-        """Creates a new column in self.fastqDataFrame to hold GC content (float) for each
+        """Creates a new column in self.fastaDataFrame to hold GC content (float) for each
         sequence.
         
         Args:
@@ -383,7 +388,7 @@ class FastaFile:
             none
         """
         
-        self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(GCcontent)
+        self.fastaDataFrame['GC Content'] = self.fastaDataFrame['Seq'].apply(GCcontent)
         
         
     def plotGCcontent(self, outfile=False):
@@ -420,7 +425,7 @@ class FastaFile:
             
             self.calculateGC()
             
-            print("'GC Content' column has been added to self.fastqDataFrame")
+            print("'GC Content' column has been added to self.fastaDataFrame")
             
             self.plotGCcontent()
         
