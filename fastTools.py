@@ -202,7 +202,7 @@ class FastqFile:
             plt.tight_layout()
             
             if outfile:
-                plt.savefig()
+                plt.savefig(outfile)
             else:
                 plt.show()
             
@@ -241,7 +241,7 @@ class FastqFile:
             plt.tight_layout()
             
             if outfile:
-                plt.savefig()
+                plt.savefig(outfile)
             else:
                 plt.show()
             
@@ -416,7 +416,7 @@ class FastaFile:
             plt.tight_layout()
             
             if outfile:
-                plt.savefig()
+                plt.savefig(outfile)
             else:
                 plt.show()
             
