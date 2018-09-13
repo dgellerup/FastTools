@@ -20,7 +20,7 @@ data.
 ## Module Attributes
 qScoreDict: Dictionary that maps Illumina QScore symbols to their integer values.  
 * Usage
-  * fastTools.qScoreDict
+  * myQualityDict = fastTools.qScoreDict
   * fastTools.qScoreDict['?']
     * Returns 30
 
@@ -32,8 +32,7 @@ qScoreDict: Dictionary that maps Illumina QScore symbols to their integer values
     
   * myfile = fastTools.FastqFile('Sample1_S1_L001_R2_001.fastq.gz', False)
     * Will create a FastqFile from only the file name passed.
-    
-  * myfile = fastTools.FastaFile('Sample1.fasta')
+  
 #### Class attributes
 self.fastq: Name of FASTQ file passed during initialization.
 
@@ -54,3 +53,47 @@ self.numReads: Number of reads in self.fastqDataFrame.
   * Returns 432281
   * Note this is the same as len(myfile.fastqDataFrame)
   
+#### Class methods
+self.averageQuality()
+
+self.reverseComplement()
+
+self.aminoAcid()
+
+self.calculateGC()
+
+self.plotAverageQuality(outfile=False)
+
+self.plotGCcontent(outfile=False)
+
+self.writeFASTQ(outfile)
+
+## FastaFile class
+### Usage
+#### Initialization  
+  * myfile = fastTools.FastaFile('Sample1.fasta')
+  
+#### Class attributes
+self.fasta: Name of FASTQ file passed during initialization.
+
+self.fastaDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
+
+self.numReads: Number of reads in self.fastqDataFrame.
+
+##### Example:
+* myfile.fastq
+  * Returns 'Sample1.fasta'
+* myfile.numReads
+  * Returns 216140
+  * Note this is the same as len(myfile.fastaDataFrame)
+  
+#### Class methods
+self.reverseComplement()
+
+self.aminoAcid()
+
+self.calculateGC()
+
+self.plotGCcontent(outfile=False)
+
+self.writeFASTA(outfile)
