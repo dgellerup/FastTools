@@ -91,6 +91,10 @@ class FastqFile:
                 fqseqList = [pairedLinesList[i] for i in range(1, len(pairedLinesList), 4)]
                 fqdirectionList = [pairedLinesList[i] for i in range(2, len(pairedLinesList), 4)]
                 fqqualList = [pairedLinesList[i] for i in range(3, len(pairedLinesList), 4)]
+                
+            else:
+                print("FastqFile was given paired=True, but no paired file was found.")
+                print("Retry fastTools.FastqFile(fastq, False) to set paired=False.")
                        
         # If there is no reverse file, or an unpaired FastqFile object is desired.
         else:
