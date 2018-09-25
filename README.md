@@ -52,7 +52,7 @@ self.numReads: Number of reads in self.fastqDataFrame.
   * Note this is the same as len(myfile.fastqDataFrame)
   
 #### Class methods
-**These methods create a new column in self.fastqDataFrame that contains calculated data.**
+**These methods create a new column in self.fastqDataFrame that contains calculated data.**  
 self.averageQuality()
 
 self.reverseComplement()
