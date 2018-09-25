@@ -93,6 +93,7 @@ self.numReads: Number of reads in self.fastqDataFrame.
   
 #### Class methods
 **These methods create a new column in self.fastqDataFrame that contains calculated data.**
+
 self.reverseComplement()
 
 self.aminoAcid()
