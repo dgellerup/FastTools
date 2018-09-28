@@ -193,40 +193,41 @@ class FastqFile:
         Returns:
             none
         """
+        
         if 'seaborn' not in sys.modules:
-            import seaborn as sns
-        else:
             try:
-                
-                if 'Avg Qual' in self.fastqDataFrame.columns:
-                    fig = plt.figure(figsize=(9, 6))
-                    
-                    sns.distplot(self.fastqDataFrame['Avg Qual'], kde=False)
-                    
-                    plt.title("Per Sequence Average Quality")
-                    plt.ylabel("Count")
-                    plt.xlabel("Quality Score")
-                    
-                    plt.tight_layout()
-                    
-                    if outfile:
-                        plt.savefig(outfile)
-                    else:
-                        plt.show()
-                    
-                else:
-                    print("Calculating per-read average quality data.")
-                    
-                    self.averageQuality()
-                    
-                    print("'Avg Qual' column has been added to self.fastqDataFrame")
-                    
-                    self.plotAverageQuality()
-            
+                import seaborn as sns
             except NameError:
                     print("It appears that the Seaborn library is not installed.")
                     print("You can install Seaborn on the command line with:")
                     print("conda install seaborn \n -or- \n pip install seaborn")
+                    
+                    return
+            
+        if 'Avg Qual' in self.fastqDataFrame.columns:
+            fig = plt.figure(figsize=(9, 6))
+            
+            sns.distplot(self.fastqDataFrame['Avg Qual'], kde=False)
+            
+            plt.title("Per Sequence Average Quality")
+            plt.ylabel("Count")
+            plt.xlabel("Quality Score")
+            
+            plt.tight_layout()
+            
+            if outfile:
+                plt.savefig(outfile)
+            else:
+                plt.show()
+            
+        else:
+            print("Calculating per-read average quality data.")
+            
+            self.averageQuality()
+            
+            print("'Avg Qual' column has been added to self.fastqDataFrame")
+            
+            self.plotAverageQuality()
             
 
     def plotGCcontent(self, outfile=False):
@@ -243,39 +244,39 @@ class FastqFile:
         """
         
         if 'seaborn' not in sys.modules:
-            import seaborn as sns
-        else:
             try:
-                
-                if 'GC Content' in self.fastqDataFrame.columns:
-                    fig = plt.figure(figsize=(9, 6))
-                    
-                    sns.distplot(self.fastqDataFrame['GC Content'], kde=False)
-                    
-                    plt.title("Per Sequence GC Content")
-                    plt.ylabel("Count")
-                    plt.xlabel("GC Content (%)")
-                    
-                    plt.tight_layout()
-                    
-                    if outfile:
-                        plt.savefig(outfile)
-                    else:
-                        plt.show()
-                    
-                else:
-                    print("Calculating per-read GC content data.")
-                    
-                    self.calculateGC()
-                    
-                    print("'GC Content' column has been added to self.fastqDataFrame")
-                    
-                    self.plotGCcontent()
-                    
+                import seaborn as sns
             except NameError:
-                print("It appears that the Seaborn library is not installed.")
-                print("You can install Seaborn on the command line with:")
-                print("conda install seaborn \n -or- \n pip install seaborn")
+                    print("It appears that the Seaborn library is not installed.")
+                    print("You can install Seaborn on the command line with:")
+                    print("conda install seaborn \n -or- \n pip install seaborn")
+                    
+                    return
+                
+        if 'GC Content' in self.fastqDataFrame.columns:
+            fig = plt.figure(figsize=(9, 6))
+            
+            sns.distplot(self.fastqDataFrame['GC Content'], kde=False)
+            
+            plt.title("Per Sequence GC Content")
+            plt.ylabel("Count")
+            plt.xlabel("GC Content (%)")
+            
+            plt.tight_layout()
+            
+            if outfile:
+                plt.savefig(outfile)
+            else:
+                plt.show()
+            
+        else:
+            print("Calculating per-read GC content data.")
+            
+            self.calculateGC()
+            
+            print("'GC Content' column has been added to self.fastqDataFrame")
+            
+            self.plotGCcontent()
             
 
     def writeFASTQ(self, outfile):
@@ -428,39 +429,39 @@ class FastaFile:
         """
         
         if 'seaborn' not in sys.modules:
-            import seaborn as sns
-        else:
             try:
-        
-                if 'GC Content' in self.fastaDataFrame.columns:
-                    fig = plt.figure(figsize=(9, 6))
-                    
-                    sns.distplot(self.fastaDataFrame['GC Content'], kde=False)
-                    
-                    plt.title("Per Sequence GC Content")
-                    plt.ylabel("Count")
-                    plt.xlabel("GC Content (%)")
-                    
-                    plt.tight_layout()
-                    
-                    if outfile:
-                        plt.savefig(outfile)
-                    else:
-                        plt.show()
-                    
-                else:
-                    print("Calculating per-read GC content data.")
-                    
-                    self.calculateGC()
-                    
-                    print("'GC Content' column has been added to self.fastaDataFrame")
-                    
-                    self.plotGCcontent()
-                    
+                import seaborn as sns
             except NameError:
-                print("It appears that the Seaborn library is not installed.")
-                print("You can install Seaborn on the command line with:")
-                print("conda install seaborn \n -or- \n pip install seaborn")
+                    print("It appears that the Seaborn library is not installed.")
+                    print("You can install Seaborn on the command line with:")
+                    print("conda install seaborn \n -or- \n pip install seaborn")
+                    
+                    return
+        
+        if 'GC Content' in self.fastaDataFrame.columns:
+            fig = plt.figure(figsize=(9, 6))
+            
+            sns.distplot(self.fastaDataFrame['GC Content'], kde=False)
+            
+            plt.title("Per Sequence GC Content")
+            plt.ylabel("Count")
+            plt.xlabel("GC Content (%)")
+            
+            plt.tight_layout()
+            
+            if outfile:
+                plt.savefig(outfile)
+            else:
+                plt.show()
+            
+        else:
+            print("Calculating per-read GC content data.")
+            
+            self.calculateGC()
+            
+            print("'GC Content' column has been added to self.fastaDataFrame")
+            
+            self.plotGCcontent()
         
         
     def writeFASTA(self, outfile):
