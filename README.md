@@ -1,5 +1,7 @@
 # FastTools: Python module with tools useful for reading and manipulating FASTQ/FASTA files.
 
+## Currently only supporting Python 3.6
+
 FastTools is a module written with the intention of making working with FASTQ/FASTA files more convenient for Python users.
 This module gives the user high-level control over their NGS data, and uses a Data Science orientation to work with sequence
 data.
