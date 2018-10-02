@@ -1,0 +1,9 @@
+# Don't track content of these folders
+__pycache__/
+
+# Don't track sequence data files
+*.fastq
+*.fastq.gz
+
+# Misc
+.DS_Store
