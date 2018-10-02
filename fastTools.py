@@ -28,81 +28,113 @@ class FastqFile:
     interleaved FastqFile object.
     
     Args:
-        fastq (str): Name of a .fastq or .fastq.gz file.
-        paired (bool): Boolean indicating whether FastqFile class should look for and interleave paired read file.
+        fastq1 (str): Name of a .fastq or .fastq.gz file.
+        fastq2 (str) (default: None): Name of a .fastq or .fastq.gz file.
+        paired (bool) (default: False): Boolean indicating whether FastqFile class should look for and interleave paired read file.
+                                        Coerced to True if fastq2 argument is passed.
     
     """
         
-    def __init__(self, fastq, paired=True):
+    def __init__(self, fastq1, fastq2=None, paired=False):
         
-        self.fastq = fastq
+        if fastq1 in os.listdir():
+            self.fastq1 = fastq1
+        else:
+            print(f'{fastq1} not found in current directory')
+            
+            return
         
         # Takes the full file name and shortens it to a readable name.
         try:
-            self.sample = '_'.join(fastq.split("_")[:2])
+            self.sample = '_'.join(fastq1.split("_")[:2])
         except:
-            self.sample = fastq
+            self.sample = fastq1
         
         self.paired = paired
         
-        if paired:
-            if "_R1_" in fastq:
-                # Replace '_R1_' with '_R2_' in fastq file name.
-                fastq2 = fastq.replace("_R1_", "_R2_")
-            elif "_R2_" in fastq:
-                # Replace '_R2_' with '_R1_' in fastq file name.
-                fastq2 = fastq.replace("_R2_", "_R1_")
+        if fastq2: 
+            if fastq2 in os.listdir():
+                self.paired = True
+                self.fastq2 = fastq2
+            else:
+                self.paired = False
+                self.fastq2 = "None"
+                print((f'{fastq2} not found in current directory.\n'
+                       f'Continuing with single file {self.fastq1}'))
+        else:
+            if self.paired:
+                if "_R1_" in fastq1:
+                    # Replace '_R1_' with '_R2_' in fastq1 file name.
+                    if fastq1.replace("_R1_", "_R2_") in os.listdir():
+                        self.fastq2 = fastq1.replace("_R1_", "_R2_")
+                        fastq2 = True
+                    else:
+                        self.paired = False
+                        self.fastq2 = "None"
+                        fastq2 = False
+                        print((f"Attempted to find a mate for {self.fastq1}, but none was found.\n"
+                               f"Continuing with single file {self.fastq1}"))
+                elif "_R2_" in fastq1:
+                    # Replace '_R2_' with '_R1_' in fastq1 file name.
+                    holder = fastq1.replace("_R2_", "_R1_")
+                    if holder in os.listdir():
+                        self.fastq2 = self.fastq1
+                        self.fastq1 = holder
+                        fastq2 = True
+                    else:
+                        self.paired = False
+                        self.fastq2 = "None"
+                        fastq2 = False
+                        print((f"Attempted to find a mate for {self.fastq1}, but none was found.\n"
+                               f"Continuing with single file {self.fastq1}"))
+                else:
+                    fastq2 = False
+                    self.paired = False
+                    self.fastq2 = "None"
+                    print((f"Attempted to find a mate for {self.fastq1}, but none was found.\n"
+                           f"Continuing with single file {self.fastq1}"))
             else:
                 fastq2 = False
-        else:
-            fastq2 = False
+                self.fastq2 = "None"
+                self.paired = False
             
-        if fastq2:
-            self.fastq2 = fastq2
-        else:
-            self.fastq2 = "None"
-            
-        # Read fastq into fqlines list.
-        if fastq.endswith('.gz'):
-            with gzip.open(fastq, 'rt') as fastqFile:
+        # Read fastq1 into fqlines list.
+        if self.fastq1.endswith('.gz'):
+            with gzip.open(self.fastq1, 'rt') as fastqFile:
                 fqlines = fastqFile.readlines()
         else:
-            with open(fastq, 'r') as fastqFile:
+            with open(self.fastq1, 'r') as fastqFile:
                 fqlines = fastqFile.readlines()
            
-        if paired == True:
+        if self.paired:
             # If there is a reverse file, read it and add it to fqlines.
-            if fastq2 != False and fastq2 in os.listdir():
-                if fastq2.endswith('.gz'):
-                    with gzip.open(fastq2, 'rt') as fastq2File:
-                        fq2lines = fastq2File.readlines()
-                else:
-                    with open(fastq2, 'r') as fastq2File:
-                        fq2lines = fastq2File.readlines()
-    
-                # Create a new file lines list, and add fastq reads in an interleaved orientation.
-                pairedLinesList = []
-            
-                for i in range(0, len(fqlines), 4):
-                    pairedLinesList.append(fqlines[i])
-                    pairedLinesList.append(fqlines[i+1])
-                    pairedLinesList.append(fqlines[i+2])
-                    pairedLinesList.append(fqlines[i+3])
-            
-                    pairedLinesList.append(fq2lines[i])
-                    pairedLinesList.append(fq2lines[i+1])
-                    pairedLinesList.append(fq2lines[i+2])
-                    pairedLinesList.append(fq2lines[i+3])
-                    
-                # Create lists to hold FASTQ sequences and quality strings from pairedLinesList.
-                fqnameList = [pairedLinesList[i] for i in range(0, len(pairedLinesList), 4)]
-                fqseqList = [pairedLinesList[i] for i in range(1, len(pairedLinesList), 4)]
-                fqdirectionList = [pairedLinesList[i] for i in range(2, len(pairedLinesList), 4)]
-                fqqualList = [pairedLinesList[i] for i in range(3, len(pairedLinesList), 4)]
-                
+            if self.fastq2.endswith('.gz'):
+                with gzip.open(self.fastq2, 'rt') as fastq2File:
+                    fq2lines = fastq2File.readlines()
             else:
-                print("FastqFile was given paired=True, but no paired file was found.")
-                print("Retry fastTools.FastqFile(fastq, False) to set paired=False.")
+                with open(self.fastq2, 'r') as fastq2File:
+                    fq2lines = fastq2File.readlines()
+    
+            # Create a new file lines list, and add FASTQ reads in an interleaved orientation.
+            pairedLinesList = []
+        
+            for i in range(0, len(fqlines), 4):
+                pairedLinesList.append(fqlines[i])
+                pairedLinesList.append(fqlines[i+1])
+                pairedLinesList.append(fqlines[i+2])
+                pairedLinesList.append(fqlines[i+3])
+        
+                pairedLinesList.append(fq2lines[i])
+                pairedLinesList.append(fq2lines[i+1])
+                pairedLinesList.append(fq2lines[i+2])
+                pairedLinesList.append(fq2lines[i+3])
+                
+            # Create lists to hold FASTQ sequences and quality strings from pairedLinesList.
+            fqnameList = [pairedLinesList[i] for i in range(0, len(pairedLinesList), 4)]
+            fqseqList = [pairedLinesList[i] for i in range(1, len(pairedLinesList), 4)]
+            fqdirectionList = [pairedLinesList[i] for i in range(2, len(pairedLinesList), 4)]
+            fqqualList = [pairedLinesList[i] for i in range(3, len(pairedLinesList), 4)]
+                
                        
         # If there is no reverse file, or an unpaired FastqFile object is desired.
         else:
@@ -117,20 +149,23 @@ class FastqFile:
         # Create a data frame "fastqDataFrame" from fqseqList and fqqualList
         self.fastqDataFrame = pd.DataFrame({'Name': fqnameList, 'Seq': fqseqList, 
                                       'Direction': fqdirectionList, 'Qual': fqqualList})
-    
-        self.numReads = len(self.fastqDataFrame)
         
     
     def __len__(self):
         return len(self.fastqDataFrame)
     
+    def __str__(self):
+        return (f'{self.sample}')
     
     def __repr__(self):
         return (f'{self.__class__.__name__}('
-                f'in1={self.fastq}, in2={self.fastq2})'
+                f'in1={self.fastq1}, in2={self.fastq2})'
                 f' Columns: {list(self.fastqDataFrame.columns)}')
                 
-        
+    def numReads(self):
+        return len(self.fastqDataFrame)
+    
+    
     def averageQuality(self):
         """Appends a column to self.fastqDataFrame that contains average quality scores for each read.
         
@@ -211,12 +246,15 @@ class FastqFile:
         Returns:
             none
         """
-            
+                
         if 'Avg Qual' in self.fastqDataFrame.columns:
             
-            if 'seaborn' not in sys.modules:
+            try:
+                sns
+            except NameError:
                 try:
                     import seaborn as sns
+            
                 except ModuleNotFoundError:
                         print("It appears that the Seaborn library is not installed.")
                         print("You can install Seaborn on the command line with:")
@@ -260,19 +298,23 @@ class FastqFile:
             
         Returns:
             none
-        """
-        
-        if 'seaborn' not in sys.modules:
-            try:
-                import seaborn as sns
-            except ModuleNotFoundError:
-                    print("It appears that the Seaborn library is not installed.")
-                    print("You can install Seaborn on the command line with:")
-                    print("conda install seaborn \n -or- \n pip install seaborn")
-                    
-                    return
+        """        
                 
         if 'GC Content' in self.fastqDataFrame.columns:
+            
+            try:
+                sns
+            except NameError:
+                try:
+                    import seaborn as sns
+                    
+                except ModuleNotFoundError:
+                        print("It appears that the Seaborn library is not installed.")
+                        print("You can install Seaborn on the command line with:")
+                        print("conda install seaborn \n -or- \n pip install seaborn")
+                        
+                        return
+            
             fig = plt.figure(figsize=(9, 6))
             
             sns.distplot(self.fastqDataFrame['GC Content'], kde=False)
@@ -396,6 +438,14 @@ class FastaFile:
     def __len__(self):
         return len(self.fastaDataFrame)
     
+    def __str__(self):
+        return (f'{self.fasta}')
+    
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'in1={self.fasta}'
+                f' Columns: {list(self.fastaDataFrame.columns)}')
+    
         
     def reverseComplement(self):
         """Creates a new column in self.fastaDataFrame to hold reverse complement
@@ -451,17 +501,21 @@ class FastaFile:
             none
         """
         
-        if 'seaborn' not in sys.modules:
-            try:
-                import seaborn as sns
-            except ModuleNotFoundError:
-                    print("It appears that the Seaborn library is not installed.")
-                    print("You can install Seaborn on the command line with:")
-                    print("conda install seaborn \n -or- \n pip install seaborn")
-                    
-                    return
-        
         if 'GC Content' in self.fastaDataFrame.columns:
+            
+            try:
+                sns
+            except NameError:
+                try:
+                    import seaborn as sns
+                    
+                except ModuleNotFoundError:
+                        print("It appears that the Seaborn library is not installed.")
+                        print("You can install Seaborn on the command line with:")
+                        print("conda install seaborn \n -or- \n pip install seaborn")
+                        
+                        return
+                    
             fig = plt.figure(figsize=(9, 6))
             
             sns.distplot(self.fastaDataFrame['GC Content'], kde=False)
