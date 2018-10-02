@@ -12,7 +12,15 @@ data.
 2. Set up bioconda by following instructions at https://bioconda.github.io/
 
 3. Create fastTools environment.
-     * Use command: conda env create -f environment.yml
+     * Use command: conda env create -f environment_<your_os>.yml
+     * Tentatively, this should work for OSX and Windows.
+     
+     * Alternatively, you could create your own environment, and download the following libraries manually:  
+        matplotlib  
+        biopython  
+        pandas  
+        seaborn
+        
 
 4. Include fastTools in your project directory alongside your own modules or scripts.
 
@@ -36,27 +44,28 @@ qScoreDict: Dictionary that maps Illumina QScore symbols to their integer values
     * Will create a FastqFile from only the file name passed.
   
 #### Class attributes
-self.fastq: Name of FASTQ file passed during initialization.
+self.fastq1: Name of first FASTQ file passed during initialization.
 
-self.sample: Truncated name of FASTQ file, convenient for labelling.
+self.fastq2: Name of second FASTQ file if passed during initialization. Else, returns "None".
+
+self.sample: Truncated name of self.fastq1 file, convenient for labelling.
 
 self.paired: True if R1 and R2 files were read and combined; False if only R1 or R2 file used.
 
 self.fastqDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
 
-self.numReads: Number of reads in self.fastqDataFrame.
-
 ##### Example:
-* myfile.fastq
-  * Returns 'Sample1_S1_L001_R2_001.fastq.gz'
+* myfile.fastq1
+  * Returns 'Sample1_S1_L001_R1_001.fastq.gz'
+* myfile.fastq2
+  * Returns 'None' if a second file was not passed
 * myfile.sample
   * Returns 'Sample1_S1'
-* myfile.numReads
-  * Returns 432281
-  * Note this is the same as len(myfile.fastqDataFrame)
   
 #### Class methods
 **These methods create a new column in self.fastqDataFrame that contains calculated data.**  
+
+self.numReads(): Returns number of reads in self.fastqDataFrame.
 
 self.averageQuality()
 
@@ -86,17 +95,14 @@ self.fasta: Name of FASTQ file passed during initialization.
 
 self.fastaDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
 
-self.numReads: Number of reads in self.fastqDataFrame.
-
 ##### Example:
 * myfile.fastq
   * Returns 'Sample1.fasta'
-* myfile.numReads
-  * Returns 216140
-  * Note this is the same as len(myfile.fastaDataFrame)
   
 #### Class methods
 **These methods create a new column in self.fastqDataFrame that contains calculated data.**
+
+self.numReads: Number of reads in self.fastaDataFrame.
 
 self.reverseComplement()
 
