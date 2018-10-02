@@ -45,15 +45,23 @@ class FastqFile:
         
         self.paired = paired
         
-        if "_R1_" in fastq:
-            # Replace '_R1_' with '_R2_' in fastq file name.
-            fastq2 = fastq.replace("_R1_", "_R2_")
-        elif "_R2_" in fastq:
-            # Replace '_R2_' with '_R1_' in fastq file name.
-            fastq2 = fastq.replace("_R2_", "_R1_")
+        if paired:
+            if "_R1_" in fastq:
+                # Replace '_R1_' with '_R2_' in fastq file name.
+                fastq2 = fastq.replace("_R1_", "_R2_")
+            elif "_R2_" in fastq:
+                # Replace '_R2_' with '_R1_' in fastq file name.
+                fastq2 = fastq.replace("_R2_", "_R1_")
+            else:
+                fastq2 = False
         else:
             fastq2 = False
-        
+            
+        if fastq2:
+            self.fastq2 = fastq2
+        else:
+            self.fastq2 = "None"
+            
         # Read fastq into fqlines list.
         if fastq.endswith('.gz'):
             with gzip.open(fastq, 'rt') as fastqFile:
@@ -111,7 +119,17 @@ class FastqFile:
                                       'Direction': fqdirectionList, 'Qual': fqqualList})
     
         self.numReads = len(self.fastqDataFrame)
-            
+        
+    
+    def __len__(self):
+        return len(self.fastqDataFrame)
+    
+    
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'in1={self.fastq}, in2={self.fastq2})'
+                f' Columns: {list(self.fastqDataFrame.columns)}')
+                
         
     def averageQuality(self):
         """Appends a column to self.fastqDataFrame that contains average quality scores for each read.
@@ -193,18 +211,19 @@ class FastqFile:
         Returns:
             none
         """
-        
-        if 'seaborn' not in sys.modules:
-            try:
-                import seaborn as sns
-            except NameError:
-                    print("It appears that the Seaborn library is not installed.")
-                    print("You can install Seaborn on the command line with:")
-                    print("conda install seaborn \n -or- \n pip install seaborn")
-                    
-                    return
             
         if 'Avg Qual' in self.fastqDataFrame.columns:
+            
+            if 'seaborn' not in sys.modules:
+                try:
+                    import seaborn as sns
+                except ModuleNotFoundError:
+                        print("It appears that the Seaborn library is not installed.")
+                        print("You can install Seaborn on the command line with:")
+                        print("conda install seaborn \n -or- \n pip install seaborn")
+                        
+                        return
+                
             fig = plt.figure(figsize=(9, 6))
             
             sns.distplot(self.fastqDataFrame['Avg Qual'], kde=False)
@@ -246,7 +265,7 @@ class FastqFile:
         if 'seaborn' not in sys.modules:
             try:
                 import seaborn as sns
-            except NameError:
+            except ModuleNotFoundError:
                     print("It appears that the Seaborn library is not installed.")
                     print("You can install Seaborn on the command line with:")
                     print("conda install seaborn \n -or- \n pip install seaborn")
@@ -374,6 +393,10 @@ class FastaFile:
         self.numReads = len(self.fastaDataFrame)
         
         
+    def __len__(self):
+        return len(self.fastaDataFrame)
+    
+        
     def reverseComplement(self):
         """Creates a new column in self.fastaDataFrame to hold reverse complement
         DNA sequences.
@@ -431,7 +454,7 @@ class FastaFile:
         if 'seaborn' not in sys.modules:
             try:
                 import seaborn as sns
-            except NameError:
+            except ModuleNotFoundError:
                     print("It appears that the Seaborn library is not installed.")
                     print("You can install Seaborn on the command line with:")
                     print("conda install seaborn \n -or- \n pip install seaborn")
