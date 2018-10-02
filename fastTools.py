@@ -432,8 +432,6 @@ class FastaFile:
 
         self.fastaDataFrame = pd.DataFrame({'Name': fanameList, 'Seq': faseqList})
         
-        self.numReads = len(self.fastaDataFrame)
-        
         
     def __len__(self):
         return len(self.fastaDataFrame)
@@ -446,7 +444,11 @@ class FastaFile:
                 f'in1={self.fasta}'
                 f' Columns: {list(self.fastaDataFrame.columns)}')
     
-        
+    
+    def numReads(self):
+        return len(self.fastaDataFrame)
+    
+    
     def reverseComplement(self):
         """Creates a new column in self.fastaDataFrame to hold reverse complement
         DNA sequences.
