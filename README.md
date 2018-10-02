@@ -15,12 +15,9 @@ data.
      * Use command: conda env create -f environment_<your_os>.yml
      * Tentatively, this should work for OSX and Windows.
      
-     * Alternatively, you could create your own environment, and download the following libraries manually:  
-        matplotlib  
-        biopython  
-        pandas  
-        seaborn
-        
+     * Alternatively, you could create your own environment, and download the following libraries manually.
+        "conda install seaborn" will take care of installing pandas, matplotlib, and seaborn for you.
+        "conda install biopython" should be the only other command needed to fulfill FastTools' requirements.
 
 4. Include fastTools in your project directory alongside your own modules or scripts.
 
