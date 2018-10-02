@@ -9,12 +9,14 @@ data.
 ## Setup
 1. Clone or download FastTools repository.
 
-2. Create fastTools environment.
+2. Set up bioconda by following instructions at https://bioconda.github.io/
+
+3. Create fastTools environment.
      * Use command: conda env create -f environment.yml
 
-3. Include fastTools in your project directory alongside your own modules or scripts.
+4. Include fastTools in your project directory alongside your own modules or scripts.
 
-4. Import module.
+5. Import module.
      * Place "import fastTools" at the top of the script you want to use it in.
 
 ## Module Attributes
