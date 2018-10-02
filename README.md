@@ -44,17 +44,21 @@ qScoreDict: Dictionary that maps Illumina QScore symbols to their integer values
     * Will create a FastqFile from only the file name passed.
   
 #### Class attributes
-self.fastq: Name of FASTQ file passed during initialization.
+self.fastq1: Name of first FASTQ file passed during initialization.
 
-self.sample: Truncated name of FASTQ file, convenient for labelling.
+self.fastq2: Name of second FASTQ file if passed during initialization. Else, returns "None".
+
+self.sample: Truncated name of self.fastq1 file, convenient for labelling.
 
 self.paired: True if R1 and R2 files were read and combined; False if only R1 or R2 file used.
 
 self.fastqDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
 
 ##### Example:
-* myfile.fastq
+* myfile.fastq1
   * Returns 'Sample1_S1_L001_R2_001.fastq.gz'
+* myfile.fastq2
+  * Returns 'None' if a second file was not passed
 * myfile.sample
   * Returns 'Sample1_S1'
   
