@@ -96,13 +96,13 @@ self.fasta: Name of FASTQ file passed during initialization.
 self.fastaDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
 
 ##### Example:
-* myfile.fastq
+* myfile.fasta
   * Returns 'Sample1.fasta'
   
 #### Class methods
 **These methods create a new column in self.fastqDataFrame that contains calculated data.**
 
-self.numReads: Number of reads in self.fastaDataFrame.
+self.numReads(): Number of reads in self.fastaDataFrame.
 
 self.reverseComplement()
 
