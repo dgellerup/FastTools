@@ -12,7 +12,15 @@ data.
 2. Set up bioconda by following instructions at https://bioconda.github.io/
 
 3. Create fastTools environment.
-     * Use command: conda env create -f environment.yml
+     * Use command: conda env create -f environment_<your_os>.yml
+     * Tentatively, this should work for OSX and Windows.
+     
+     * Alternatively, you could create your own environment, and download the following libraries manually:
+        matplotlib
+        biopython
+        pandas
+        seaborn
+        
 
 4. Include fastTools in your project directory alongside your own modules or scripts.
 
