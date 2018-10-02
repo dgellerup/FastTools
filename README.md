@@ -15,10 +15,10 @@ data.
      * Use command: conda env create -f environment_<your_os>.yml
      * Tentatively, this should work for OSX and Windows.
      
-     * Alternatively, you could create your own environment, and download the following libraries manually:
-        matplotlib
-        biopython
-        pandas
+     * Alternatively, you could create your own environment, and download the following libraries manually:  
+        matplotlib  
+        biopython  
+        pandas  
         seaborn
         
 
