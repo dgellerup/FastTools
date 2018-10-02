@@ -52,19 +52,16 @@ self.paired: True if R1 and R2 files were read and combined; False if only R1 or
 
 self.fastqDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
 
-self.numReads: Number of reads in self.fastqDataFrame.
-
 ##### Example:
 * myfile.fastq
   * Returns 'Sample1_S1_L001_R2_001.fastq.gz'
 * myfile.sample
   * Returns 'Sample1_S1'
-* myfile.numReads
-  * Returns 432281
-  * Note this is the same as len(myfile.fastqDataFrame)
   
 #### Class methods
 **These methods create a new column in self.fastqDataFrame that contains calculated data.**  
+
+self.numReads(): Returns number of reads in self.fastqDataFrame.
 
 self.averageQuality()
 
@@ -94,17 +91,14 @@ self.fasta: Name of FASTQ file passed during initialization.
 
 self.fastaDataFrame: Pandas DataFrame object that holds all read/calculated data for the FastqFile object.
 
-self.numReads: Number of reads in self.fastqDataFrame.
-
 ##### Example:
 * myfile.fastq
   * Returns 'Sample1.fasta'
-* myfile.numReads
-  * Returns 216140
-  * Note this is the same as len(myfile.fastaDataFrame)
   
 #### Class methods
 **These methods create a new column in self.fastqDataFrame that contains calculated data.**
+
+self.numReads: Number of reads in self.fastaDataFrame.
 
 self.reverseComplement()
 
