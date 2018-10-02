@@ -8,7 +8,6 @@ and FASTA files in Python easier, faster, and accessible to more users.
 
 """
 import os
-import sys
 import gzip
 import pandas as pd
 import csv
