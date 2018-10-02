@@ -56,7 +56,7 @@ self.fastqDataFrame: Pandas DataFrame object that holds all read/calculated data
 
 ##### Example:
 * myfile.fastq1
-  * Returns 'Sample1_S1_L001_R2_001.fastq.gz'
+  * Returns 'Sample1_S1_L001_R1_001.fastq.gz'
 * myfile.fastq2
   * Returns 'None' if a second file was not passed
 * myfile.sample
