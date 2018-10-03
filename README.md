@@ -12,10 +12,10 @@ data.
 2. Create fastTools environment.
 
     * Anaconda Python Distrbution:  
-        a. Set up bioconda by following instructions at https://bioconda.github.io/
+        a. Set up bioconda by following instructions at https://bioconda.github.io/  
         b. Use command:  
-            For Mac: conda env create -f environment_osx.yml
-            For Win: conda env create -f environment_win.yml
+            - For Mac: conda env create -f environment_osx.yml  
+            - For Win: conda env create -f environment_win.yml
             
             * Tentatively, this should work for OSX and Windows.
      
@@ -92,7 +92,7 @@ data.
 
 **This method saves your FastqFile object as a .fastq.gz file in the current directory.**  
 
-self.writeFASTQ(outfile)
+`self.writeFASTQ(outfile)`
 
 ## FastaFile class
 ### Usage
