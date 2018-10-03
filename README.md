@@ -9,16 +9,28 @@ data.
 ## Setup
 1. Clone or download FastTools repository.
 
-2. Set up bioconda by following instructions at https://bioconda.github.io/
+2. Create fastTools environment.
 
-3. Create fastTools environment.
-     * Use command: conda env create -f environment_<your_os>.yml
-     * Tentatively, this should work for OSX and Windows.
+    * Anaconda Python Distrbution:  
+        a. Set up bioconda by following instructions at https://bioconda.github.io/
+        b. Use command:  
+            For Mac: conda env create -f environment_osx.yml
+            For Win: conda env create -f environment_win.yml
+            
+            * Tentatively, this should work for OSX and Windows.
      
-     * Alternatively, you could create your own environment, and download the following libraries manually.  
-        "conda install seaborn" will take care of installing pandas, matplotlib, and seaborn for you.  
-        "conda install biopython" should be the only other command needed to fulfill FastTools' requirements.
+            * Alternatively, you could create your own environment, and download the following libraries manually.  
+                "conda install seaborn" will install pandas, matplotlib, and seaborn for you.  
+                "conda install biopython" should fulfill FastTools' requirements.
+            
+        c. If adding to an existing environment, activate your environment the use command:  
+            conda env update -f=environment_<your_os>.yml
 
+    * Using pip and venv:  
+        a. python3 -m venv env  
+        b. source env/bin/activate  
+        c. pip install -r requirements.txt
+        
 4. Include fastTools in your project directory alongside your own modules or scripts.
 
 5. Import module.
