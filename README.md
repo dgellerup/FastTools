@@ -19,7 +19,7 @@ data.
             
             * Tentatively, this should work for OSX and Windows.
      
-            * Alternatively, you could create your own environment, and download the following libraries manually.  
+            * Alternatively, you could create your own environment, and download libraries manually.  
                 "conda install seaborn" will install pandas, matplotlib, and seaborn for you.  
                 "conda install biopython" should fulfill FastTools' requirements.
             
