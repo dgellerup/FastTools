@@ -229,7 +229,7 @@ class FastqFile:
             none
         """
         
-        self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(GCcontent)
+        self.fastqDataFrame['GC Content'] = self.fastqDataFrame['Seq'].apply(gc_content)
         
         
     def plotAverageQuality(self, outfile=False):
@@ -486,7 +486,7 @@ class FastaFile:
             none
         """
         
-        self.fastaDataFrame['GC Content'] = self.fastaDataFrame['Seq'].apply(GCcontent)
+        self.fastaDataFrame['GC Content'] = self.fastaDataFrame['Seq'].apply(gc_content)
         
         
     def plotGCcontent(self, outfile=False):
@@ -612,10 +612,10 @@ def revComp(seqString):
     return revComp
 
 
-def GCcontent(seqString):
+def gc_content(seqString):
     """Custom function used by FastqFile and FastaFile objects in a pandas apply() call to
     calculate the GC content of a DNA sequence. This function can also be called on
-    a sequence manually with fastTools.GCcontent(yourSequence). Same exact usage
+    a sequence manually with fastTools.gc_content(yourSequence). Same exact usage
     as biopython's Bio.SeqUtils GC() function.
     
     Args:
