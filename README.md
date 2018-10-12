@@ -29,7 +29,7 @@ data.
     * Using pip and venv:  
         a. python3 -m venv env  
         b. source env/bin/activate  
-        c. pip install -r requirements.txt
+        c. pip install -r pip_requirements.txt
         
 4. Include fastTools in your project directory alongside your own modules or scripts.
 
