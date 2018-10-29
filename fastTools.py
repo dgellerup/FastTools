@@ -22,7 +22,7 @@ class FastqFile:
     holds sequence and quality data. Methods are available for calculating basic
     informatics, such as average read quality and GC content. If paired is passed
     as False an object will be built with only reads from the file name passed;
-    if paired is not passed, or is redundantly passed as True, FastqFile will look
+    if paired is redundantly passed as True, FastqFile will look
     for a matching forward/reverse (R1 or R2) file and combine them into an
     interleaved FastqFile object.
     
