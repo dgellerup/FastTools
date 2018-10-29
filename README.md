@@ -23,13 +23,13 @@ data.
                 "conda install seaborn" will install pandas, matplotlib, and seaborn for you.  
                 "conda install biopython" should fulfill FastTools' requirements.
             
-        c. If adding to an existing environment, activate your environment the use command:  
+        c. If adding to an existing environment, activate your environment then use command:  
             conda env update -f=environment_<your_os>.yml
 
     * Using pip and venv:  
         a. python3 -m venv env  
         b. source env/bin/activate  
-        c. pip install -r requirements.txt
+        c. pip install -r pip_requirements.txt
         
 4. Include fastTools in your project directory alongside your own modules or scripts.
 
