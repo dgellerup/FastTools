@@ -593,6 +593,62 @@ class FastaFile:
         longdf.to_csv(outfile, index=False, header=False, quoting=csv.QUOTE_NONE, quotechar="", escapechar="\\", compression='gzip')
        
         
+class VcfFile:
+    
+    def __init__(self, vcf):
+                
+        with open(vcf, 'r') as vcffile:
+            lines = vcffile.readlines()
+            
+        metaList = [line[2:].strip() for line in lines if line.startswith("##")]
+        
+        self.info = {}
+        self.filter = {}
+        self.format= {}
+                    
+        for item in metaList:
+            if item.startswith("fileformat"):
+                self.fileformat = item.split("=")[-1]
+            elif item.startswith("fileDate"):
+                self.fileDate = item.split("=")[-1]
+            elif item.startswith("source"):
+                self.source = item.split("=")[-1]
+            elif item.startswith("contig"):
+                self.contig = item.split("contig=")[-1]
+                if "species" in item:
+                    self.contigSpecies = item.strip(">").split("species=")[-1].split(",")[0]
+                if "length" in item:
+                    self.contigLength = int(item.strip(">").split("length=")[-1].split(",")[0])
+                if "assembly" in item:
+                    self.contigAssembly = item.strip(">").split("assembly=")[-1].split(",")[0]
+                if "taxonomy" in item:
+                    self.contigTaxonomy = item.strip(">").split("taxonomy=")[-1].split(",")[0]
+            elif item.startswith("reference"):
+                self.reference = item.split("=")[-1]
+            elif item.startswith("phasing"):
+                self.phasing = item.split("=")[-1]
+            elif item.startswith("INFO"):
+                iden = item.split("ID=")[-1].split(",")[0]
+                self.info[iden] = item.strip(">").split("<")[-1].split(",")[1:].replace('\"', '')
+            elif item.startswith("FILTER"):
+                iden = item.split("ID=")[-1].split(",")[0]
+                self.filter[iden] = item.strip(">").split("<")[-1].split(",")[1:].replace('\"', '')
+            elif item.startswith("FORMAT"):
+                iden = item.split("ID=")[-1].split(",")[0]
+                self.format[iden] = item.strip(">").split("<")[-1].split(",")[1:].replace('\"', '')
+                    
+        vcfdf = pd.DataFrame([line.split("\t") for line in lines if not line.startswith("##")])
+        columns = list(vcfdf.iloc[0])
+        last = columns[-1]
+        last = last.strip()
+        columns.pop()
+        columns.append(last)
+        vcfdf.columns = columns
+        vcfdf.drop(vcfdf.index[0], inplace=True)
+        
+        self.vcfdf = vcfdf
+        
+        
 def revComp(seqString):
     """Custom function used by FastqFile and FastaFile objects in a pandas apply() call to
     generate an reverse complement DNA sequence string from a DNA sequence string input.
