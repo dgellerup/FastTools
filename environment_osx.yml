@@ -74,7 +74,7 @@ dependencies:
     - tabulate==0.7.5
     - termcolor==1.1.0
     - texttable==0.9.1
-    - urllib3==1.22
+    - urllib3==1.23
     - wcwidth==0.1.7
     - websocket-client==0.48.0
 prefix: /Users/dgelleru/anaconda3/envs/fastTools
