@@ -68,7 +68,7 @@ dependencies:
     - jmespath==0.9.3
     - jsonschema==2.6.0
     - pathspec==0.5.5
-    - pyyaml==3.13
+    - pyyaml==4.2b1
     - requests==2.20.0
     - semantic-version==2.5.0
     - tabulate==0.7.5
