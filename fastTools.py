@@ -36,7 +36,19 @@ class FastqFile:
         
     def __init__(self, fastq1, fastq2=None, paired=False):
         
-        if fastq1 in os.listdir():
+        current_dir = os.getcwd()
+        print(f"Original dir: {current_dir}")
+        
+        if len(fastq1.split("/")) > 1:
+            current_dir = "/".join(fastq1.split("/")[:-1])
+            
+        print(f"Changed dir: {current_dir}")
+        
+        print(f"List Dir: {os.listdir(current_dir)}")
+        
+        fastq1 = fastq1.split("/")[-1]
+        
+        if fastq1 in os.listdir(current_dir):
             self.fastq1 = fastq1
         else:
             print(f'{fastq1} not found in current directory')
@@ -52,7 +64,7 @@ class FastqFile:
         self.paired = paired
         
         if fastq2: 
-            if fastq2 in os.listdir():
+            if fastq2 in os.listdir(current_dir):
                 self.paired = True
                 self.fastq2 = fastq2
             else:
@@ -64,7 +76,7 @@ class FastqFile:
             if self.paired:
                 if "_R1_" in fastq1:
                     # Replace '_R1_' with '_R2_' in fastq1 file name.
-                    if fastq1.replace("_R1_", "_R2_") in os.listdir():
+                    if fastq1.replace("_R1_", "_R2_") in os.listdir(current_dir):
                         self.fastq2 = fastq1.replace("_R1_", "_R2_")
                         fastq2 = True
                     else:
@@ -76,7 +88,7 @@ class FastqFile:
                 elif "_R2_" in fastq1:
                     # Replace '_R2_' with '_R1_' in fastq1 file name.
                     holder = fastq1.replace("_R2_", "_R1_")
-                    if holder in os.listdir():
+                    if holder in os.listdir(current_dir):
                         self.fastq2 = self.fastq1
                         self.fastq1 = holder
                         fastq2 = True
@@ -99,7 +111,7 @@ class FastqFile:
             
         # Read fastq1 into fqlines list.
         if self.fastq1.endswith('.gz'):
-            with gzip.open(self.fastq1, 'rt') as fastqFile:
+            with gzip.open(f"{current_dir}/{self.fastq1}", 'rt') as fastqFile:
                 fqlines = fastqFile.readlines()
         else:
             with open(self.fastq1, 'r') as fastqFile:
@@ -108,7 +120,7 @@ class FastqFile:
         if self.paired:
             # If there is a reverse file, read it and add it to fqlines.
             if self.fastq2.endswith('.gz'):
-                with gzip.open(self.fastq2, 'rt') as fastq2File:
+                with gzip.open(f"{current_dir}/{self.fastq2}", 'rt') as fastq2File:
                     fq2lines = fastq2File.readlines()
             else:
                 with open(self.fastq2, 'r') as fastq2File:
