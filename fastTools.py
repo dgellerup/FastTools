@@ -170,8 +170,13 @@ class FastqFile:
     
     def __repr__(self):
         return (f'{self.__class__.__name__}('
-                f'in1={self.fastq1}, in2={self.fastq2})'
-                f' Columns: {list(self.fastqDataFrame.columns)}')
+                f'in1={self.fastq1}, in2={self.fastq2})\n'
+                f'self.fastq1\n'
+                f'self.fastq2\n'
+                f'self.sample\n'
+                f'self.paired\n'
+                f'self.fastqDataFrame\n'
+                f'Columns: {list(self.fastqDataFrame.columns)}\n')
                 
     def numReads(self):
         return len(self.fastqDataFrame)
