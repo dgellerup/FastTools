@@ -37,14 +37,10 @@ class FastqFile:
     def __init__(self, fastq1, fastq2=None, paired=False):
         
         current_dir = os.getcwd()
-        print(f"Original dir: {current_dir}")
         
         if len(fastq1.split("/")) > 1:
             current_dir = "/".join(fastq1.split("/")[:-1])
-            
-        print(f"Changed dir: {current_dir}")
         
-        print(f"List Dir: {os.listdir(current_dir)}")
         
         fastq1 = fastq1.split("/")[-1]
         
